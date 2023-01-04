@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: frame 
+# key: bframe
+# --
+\begin{frame}{$1}
+
+  $0
+
+\end{frame}

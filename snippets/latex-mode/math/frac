@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: frac
+# key: ff
+# condition: (texmathp)
+# --
+\frac{`yas-selected-text`$1}{$2}$0
