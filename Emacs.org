@@ -580,6 +580,8 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
     (efs/org-font-setup))
 
+
+
 #+end_src
 
 *** Nicer Heading Bullets
@@ -661,6 +663,16 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
 
   (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
 
+#+end_src
+
+** Size of latex equations in org mode
+
+#+begin_src emacs-lisp
+
+  (with-eval-after-load "org"
+    (progn
+      (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.5))
+      (setq org-image-actual-width (/ (display-pixel-width) 2))))
 #+end_src
 
 * Projectile
@@ -801,7 +813,7 @@ Read the [[http://joaotavora.github.io/yasnippet/index.html][documentation]] to 
   (defun fgm/yas-configure ()
     (define-key yas-minor-mode-map (kbd "SPC") yas-maybe-expand)
     (define-key yas-minor-mode-map (kbd "C-c y") #'yas-expand)
-    (yas-minor-mode 1))
+    (yas-minor-mode))
 
 #+end_src
 
@@ -822,6 +834,8 @@ Initialize the LaTeX configuration as presented by the [[https://www.emacswiki.o
     (setq TeX-parse-self t)
     (setq-default TeX-master nil))
 
+  (use-package cdlatex)
+
 #+end_src
 
 ** Default viewer
@@ -841,20 +855,20 @@ Make sure that the =TeX-interactive-mode= minor mode is on when latex file is ac
 
 #+begin_src emacs-lisp
 
-  (defun fgm/tex-configuration()
-    (TeX-source-correlate-mode 1)
-    (TeX-interactive-mode 1)
-    (visual-line-mode 1)
-    (reftex-mode 1)
-    (lsp t)
-    (fgm/yas-configure)
-    (set (make-local-variable 'company-backends) '(company-files company-capf)))
+    (defun fgm/tex-configuration()
+      (TeX-source-correlate-mode 1)
+      (TeX-interactive-mode 1)
+      (visual-line-mode 1)
+      (reftex-mode 1)
+      (lsp t)
+      (fgm/yas-configure)
+      (set (make-local-variable 'company-backends) '(company-files company-capf)))
 
-  (dolist (mode '(TeX-mode-hook
-                  LaTeX-mode-hook))
-    (add-hook mode 'fgm/tex-configuration))
+    (dolist (mode '(TeX-mode-hook
+                    LaTeX-mode-hook))
+      (add-hook mode 'fgm/tex-configuration))
 
-  (TeX-global-PDF-mode 1)
+    (TeX-global-PDF-mode 1)
 
 #+end_src
 
@@ -873,25 +887,60 @@ Make sure that the =TeX-interactive-mode= minor mode is on when latex file is ac
 
 #+end_src
 
+* Save clipboard files
+
+A simple script to save clipboard files using xclip. Include a keybind to paste it with =<leader> p=
+#+begin_src emacs-lisp
+  (load "~/.emacs.d/clipaste.el")
+
+  (setq fgm/insert-clipboard-image-use-headername t)
+
+  (efs/leader-keys
+    "p" '(fgm/insert-clipboard-image :which-key "paste img"))
+
+#+end_src
+
 * Bibliography management
 
 Biblatex configuration for managing =.bib= files.
  
 #+begin_src emacs-lisp
-      (use-package citar
-        :bind (("C-c b" . citar-insert-citation)
-               :map minibuffer-local-map
-               ("M-b" . citar-insert-preset))
-        :custom
-        (citar-bibliography '("/media/Data/Drive/04 Pós Doc/digital-amazon/Documents/References/library_standard.bib")))
 
-      (use-package ebib
-        :custom
-        (ebib-file-search-dirs '("/media/Data/Drive/04 Pós Doc/digital-amazon/Documents/References/")))
+  (use-package ebib
+    :custom
+    (ebib-file-search-dirs '("/media/Data/Drive/04 Pós Doc/digital-amazon/Documents/References/"))
+    (ebib-file-associations (list (cons "pdf" "zathura"))))
+
 #+end_src
 
-* Terminals
+* org presentations
+Configurations for creating presentations using org-mode.
 
+#+begin_src emacs-lisp
+
+  (use-package org-present)
+
+  (defun fgm/org-present-start()
+    (setq-local face-remapping-alist '(
+                                       (default (:height 1.5) variable-pitch)
+                                       (header-line (:height 4.0) variable-pitch)
+                                       (org-document-title (:height 1.75) org-document-title)
+                                       (org-code (:height 1.55) org-code)
+                                       (org-verbatim (:height 1.55) org-verbatim)
+                                       (org-block (:height 1.25) org-block)
+                                       (org-block-begin-line (:height 0.75) org-block)
+                                       )))
+
+  (defun fgm/org-present-end()
+    (setq-local face-remappint-alist '(default variable-pitch default)))
+
+  (add-hook 'org-present-mode-hook 'fgm/org-present-start)
+  (add-hook 'org-present-mode-quit-hook 'fgm/org-present-end)
+
+  (use-package ox-reveal)
+  (setq org-reveal-root "/home/fellipegm/.reveal.js/")
+#+end_src
+* Terminals
 ** term-mode
 
 =term-mode= is a built-in terminal emulator in Emacs.  Because it is written in Emacs Lisp, you can start using it immediately with very little configuration.  If you are on Linux or macOS, =term-mode= is a great choice to get started because it supports fairly complex terminal applications (=htop=, =vim=, etc) and works pretty reliably.  However, because it is written in Emacs Lisp, it can be slower than other options like =vterm=.  The speed will only be an issue if you regularly run console apps with a lot of output.
