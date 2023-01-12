@@ -1,1 +1,5 @@
-/elpa/
+elpa/
+.last-package-update-day
+init.el
+oer-reveal-org/
+var/
