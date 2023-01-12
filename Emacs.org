@@ -1,18 +1,14 @@
-#+title: Emacs From Scratch Configuration
+#+title: Emacs Configuration
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 
-* Welcome!
+* Intro
 
-This is the configuration we've been building in the *Emacs From Scratch* series, now written as an Org Mode document.  This file generates [[file:init.el][init.el]] which can be loaded by Emacs at startup.
+This emacs configuration is heavily based on the David Willson Emacs From Scratch series. Check out his youtube chanel and his github repos.
 
-*NOTE:* If you run into any issues while using this configuration, please [[https://github.com/daviwil/emacs-from-scratch/issues/new][file an issue]] or send me an email at =david at systemcrafters.cc=.
+[[https://github.com/daviwil/emacs-from-scratch][Github - Emacs from scratch]]
 
-The following variables are used to tweak some of the configuration pieces for use in the live streams so you might need to adjust them for your local machine if you try to use this configuration directly.
 
 #+begin_src emacs-lisp
-
-  ;; NOTE: init.el is now generated from Emacs.org.  Please edit that file
-  ;;       in Emacs and init.el will be generated automatically!
 
   ;; You will most likely need to adjust this font size for your system!
   (defvar efs/default-font-size 180)
@@ -22,10 +18,6 @@ The following variables are used to tweak some of the configuration pieces for u
   (defvar efs/frame-transparency '(100 . 100))
 
 #+end_src
-
-* Tips for Use
-
-In this document I've added links in many places that lead you to documentation for the various packages we use.  If you're looking at this file in Emacs, you can put your cursor on a link and press =C-c C-o= or run =M-x org-open-at-point= to open the link in your web browser.
 
 * Startup Performance
 
@@ -208,6 +200,12 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
     :config
     (evil-collection-init))
 
+  (use-package undo-tree)
+  (global-undo-tree-mode 1)
+
+  (add-hook 'evil-local-mode-hook 'turn-on-undo-tree-mode)
+
+  (setq evil-undo-system 'undo-tree) 
 #+end_src
 
 ** Keybindings for window navigation with leader key
@@ -217,7 +215,7 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
     (efs/leader-keys
       "w" '(:ignore w :which-key "window")
       "wd" '(evil-window-delete :which-key "kill window")
-      "wh" '(evil-window-split :which-key "split horizontally")
+      "ws" '(evil-window-split :which-key "split horizontally")
       "wv" '(evil-window-vsplit :which-key "split vertically")
       "wj" '(evil-window-down :which-key "window down")
       "wk" '(evil-window-up :which-key "window up")
@@ -246,6 +244,14 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
     "f" '(:ignore f :which-key "files")
     "ff" '(counsel-find-file :which-key "find file")
     "fd" '(counsel-dired :which-key "dired"))
+#+end_src
+
+* Recent files saving
+
+#+begin_src emacs-lisp
+
+  (recentf-mode 1)
+
 #+end_src
 
 * UI Configuration
@@ -468,9 +474,8 @@ This section contains the basic configuration for =org-mode= plus the configurat
     (setq org-log-into-drawer t)
 
     (setq org-agenda-files
-          '("~/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org"
-            "~/Projects/Code/emacs-from-scratch/OrgFiles/Habits.org"
-            "~/Projects/Code/emacs-from-scratch/OrgFiles/Birthdays.org"))
+          '("/media/Data/Drive/13 Org-files/Tasks.org"
+            ))
 
     (require 'org-habit)
     (add-to-list 'org-modules 'org-habit)
@@ -551,7 +556,7 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
     (setq org-capture-templates
       `(("t" "Tasks / Projects")
-        ("tt" "Task" entry (file+olp "~/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org" "Inbox")
+        ("tt" "Task" entry (file+olp "/media/Data/Drive/13 Org-files/Tasks.org" "Inbox")
              "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
         ("j" "Journal Entries")
@@ -779,20 +784,20 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 
 #+begin_src emacs-lisp
 
-    (use-package company
-      :after lsp-mode
-      :hook (lsp-mode . company-mode)
-      :bind (:map company-active-map
-             ("<tab>" . company-complete-selection))
-            (:map lsp-mode-map
-             ("<tab>" . company-indent-or-complete-common))
-      :custom
-      (company-minimum-prefix-length 1)
-      (company-idle-delay 0.0)
-      (company-box-icons-alist 'company-box-icons-all-the-icons))
+  (use-package company
+    :after lsp-mode
+    :hook (lsp-mode . company-mode)
+    :bind (:map company-active-map
+           ("<tab>" . company-complete-selection))
+          (:map lsp-mode-map
+           ("<tab>" . company-indent-or-complete-common))
+    :custom
+    (company-minimum-prefix-length 1)
+    (company-idle-delay 0.0)
+    (company-box-icons-alist 'company-box-icons-all-the-icons))
 
-    (use-package company-box
-      :hook (company-mode . company-box-mode))
+  (use-package company-box
+    :hook (company-mode . company-box-mode))
 
 #+end_src
 
@@ -887,19 +892,6 @@ Make sure that the =TeX-interactive-mode= minor mode is on when latex file is ac
 
 #+end_src
 
-* Save clipboard files
-
-A simple script to save clipboard files using xclip. Include a keybind to paste it with =<leader> p=
-#+begin_src emacs-lisp
-  (load "~/.emacs.d/clipaste.el")
-
-  (setq fgm/insert-clipboard-image-use-headername t)
-
-  (efs/leader-keys
-    "p" '(fgm/insert-clipboard-image :which-key "paste img"))
-
-#+end_src
-
 * Bibliography management
 
 Biblatex configuration for managing =.bib= files.
@@ -909,12 +901,49 @@ Biblatex configuration for managing =.bib= files.
   (use-package ebib
     :custom
     (ebib-file-search-dirs '("/media/Data/Drive/04 Pós Doc/digital-amazon/Documents/References/"))
-    (ebib-file-associations (list (cons "pdf" "zathura"))))
+    (ebib-file-associations (list (cons "pdf" "okular"))))
+
+  (use-package org-ref)
+
+  (use-package ivy-bibtex)
 
 #+end_src
 
-* org presentations
+* Save clipboard files
+
+A simple script to save clipboard files using xclip. Include a keybind to paste it with =<leader> pp=
+#+begin_src emacs-lisp
+
+  (load "~/.emacs.d/clipaste.el")
+
+  (setq fgm/insert-clipboard-image-use-headername t)
+
+#+end_src
+
+#+RESULTS:
+
+* PDF crop and convert to png
+
+Simple scripts to crop pdf files and convert it to png files.
+
+#+begin_src emacs-lisp
+
+  (load "~/.emacs.d/pdf-crop-convert.el")
+
+  (efs/leader-keys
+    "p" '(:ignore p :which-key "paste img")
+    "pc" '(fgm/crop-pdf :which-key "crop pdfs")
+    "pn" '(fgm/pdf-to-png :which-key "convert pdf-png")
+    "pa" '(fgm/crop-pdf-and-transform-to-png :which-key "crop pdf and convert png")
+    "pp" '(fgm/insert-clipboard-image :which-key "paste img"))
+
+#+end_src
+
+* org-mode presentations
+
 Configurations for creating presentations using org-mode.
+
+** Using org-present
 
 #+begin_src emacs-lisp
 
@@ -937,9 +966,70 @@ Configurations for creating presentations using org-mode.
   (add-hook 'org-present-mode-hook 'fgm/org-present-start)
   (add-hook 'org-present-mode-quit-hook 'fgm/org-present-end)
 
-  (use-package ox-reveal)
-  (setq org-reveal-root "/home/fellipegm/.reveal.js/")
 #+end_src
+
+** Using emacs-reveal 
+
+Emacs-reveal is self-configured and is not present in elpa, therefore we have to load it manually after downloading the package from gitlab.
+
+
+
+#+begin_src emacs-lisp
+
+  (add-to-list 'load-path "/home/fellipegm/.emacs.d/elpa/emacs-reveal")
+  (require 'emacs-reveal)
+
+#+end_src
+
+* Magit
+
+[[https://magit.vc/][Magit]] is the best Git interface I've ever used.  Common Git operations are easy to execute quickly using Magit's command panel system.
+
+#+begin_src emacs-lisp
+
+  (use-package magit
+    :commands magit-status
+    :custom
+    (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+
+  ;; ;; NOTE: Make sure to configure a GitHub token before using this package!
+  ;; ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
+  ;; ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
+  ;; (use-package forge
+  ;;   :after magit)
+
+#+end_src
+
+#+RESULTS:
+
+* Commenting
+
+Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=) doesn't always comment things in the way you might expect so we use [[https://github.com/redguardtoo/evil-nerd-commenter][evil-nerd-commenter]] to provide a more familiar behavior.  I've bound it to =M-/= since other editors sometimes use this binding but you could also replace Emacs' =M-;= binding with this command.
+
+#+begin_src emacs-lisp
+
+  (use-package evil-nerd-commenter
+    :bind ("M-/" . evilnc-comment-or-uncomment-lines))
+
+#+end_src
+
+#+RESULTS:
+: evilnc-comment-or-uncomment-lines
+
+* Rainbow Delimiters
+
+[[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]] is useful in programming modes because it colorizes nested parentheses and brackets according to their nesting depth.  This makes it a lot easier to visually match parentheses in Emacs Lisp code without having to count them yourself.
+
+#+begin_src emacs-lisp
+
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+#+end_src
+
+#+RESULTS:
+| rainbow-delimiters-mode |
+
 * Terminals
 ** term-mode
 
@@ -1075,7 +1165,6 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
 #+end_src
 
 * File Management
-
 ** Dired
 
 Dired is a built-in file manager for Emacs that does some pretty amazing things!  Here are some key bindings you should try out:
@@ -1175,7 +1264,6 @@ Dired is a built-in file manager for Emacs that does some pretty amazing things!
 #+end_src
 
 * Applications
-
 ** Some App
 
 This is an example of configuring another non-Emacs application using org-mode.  Not only do we write out the configuration at =.config/some-app/config=, we also compute the value that gets stored in this configuration from the Emacs Lisp block above it.
